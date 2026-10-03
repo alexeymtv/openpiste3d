@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>From lines to surfaces – OpenPiste3D</title>
+
+<!-- CesiumJS is pinned to an exact version so this page keeps rendering the same
+     way later. To move it, change the version in both URLs below. -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cesium@1.146.0/Build/Cesium/Widgets/widgets.css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+Condensed:wght@600;700&family=IBM+Plex+Sans:wght@400;500&display=swap">
+<style>
+:root{
+  --panel:rgba(14,19,22,.90); --rule:rgba(255,255,255,.14);
+  --ink:#eef3f4; --ink2:#9fb0b6; --ink3:#6f8087; --foot:#11181c;
+  --accent:#d8a24e;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;background:#05080a;color:var(--ink);
+  font-family:"IBM Plex Sans",system-ui,sans-serif;font-size:14px;overflow:hidden}
+#cesium{position:absolute;inset:0}
+.cesium-viewer-bottom{display:none}
+.hud{position:absolute;pointer-events:none;z-index:5}
+.card{background:var(--panel);border:1px solid var(--rule);border-radius:3px;
+  padding:12px 14px;backdrop-filter:blur(6px);pointer-events:auto}
+.tl{top:14px;left:14px;max-width:330px}
+h1{font-family:"IBM Plex Sans Condensed",sans-serif;font-size:17px;font-weight:700;
+  margin:0 0 3px;letter-spacing:.01em}
+.sub{font-family:"IBM Plex Mono",monospace;font-size:10.5px;color:var(--ink3);
+  line-height:1.65;letter-spacing:.02em}
+.lab{font-family:"IBM Plex Sans Condensed",sans-serif;font-size:10px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--ink3);margin:11px 0 5px}
+.seg{display:flex;border:1px solid var(--rule);border-radius:2px;overflow:hidden}
+.seg button{flex:1;font-family:"IBM Plex Sans Condensed",sans-serif;font-weight:600;
+  font-size:11.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3);
+  background:transparent;border:0;padding:7px 9px;cursor:pointer}
+.seg button+button{border-left:1px solid var(--rule)}
+.seg button[aria-pressed="true"]{background:var(--accent);color:#14181a}
+.seg button:focus-visible{outline:2px solid var(--accent);outline-offset:-3px}
+.legend{display:flex;flex-direction:column;gap:3px;margin-top:8px}
+.legend div{display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--ink2)}
+.legend i{width:11px;height:11px;border-radius:2px;flex:0 0 auto}
+.caveat{font-size:10.5px;color:var(--ink3);line-height:1.5;margin-top:7px}
+#pick .name{font-family:"IBM Plex Sans Condensed",sans-serif;font-size:15px;font-weight:700;
+  margin-bottom:6px}
+#pick table{width:100%;border-collapse:collapse;font-size:12px}
+#pick td{padding:3px 0;border-bottom:1px solid rgba(255,255,255,.06);color:var(--ink2)}
+#pick td:last-child{text-align:right;font-family:"IBM Plex Mono",monospace;color:var(--ink);
+  font-variant-numeric:tabular-nums}
+#pick tr:last-child td{border-bottom:0}
+.hint{color:var(--ink3);font-size:12px}
+.tr{position:absolute;top:14px;right:14px;width:270px}
+.foot{position:absolute;left:14px;bottom:14px;width:980px;max-width:calc(100vw - 28px);
+  font-family:"IBM Plex Mono",monospace;font-size:9.5px;color:var(--foot);line-height:1.55;
+  text-shadow:0 0 2px rgba(255,255,255,.35)}
+.mismatch{color:var(--accent);font-weight:500;margin-top:8px}
+</style>
+</head>
+<body>
+<div id="cesium"></div>
+
+<div class="hud tl card">
+  <h1>From lines to surfaces</h1>
+  <div class="sub" id="meta">loading tileset…</div>
+
+  <div class="lab">Colour by</div>
+  <div class="seg">
+    <button id="byGrade" aria-pressed="false">Mapped grade</button>
+    <button id="bySlope" aria-pressed="true">Measured slope</button>
+  </div>
+  <div class="legend" id="legend"></div>
+  <div class="caveat" id="caveat"></div>
+
+  <div class="lab">Layers</div>
+  <div class="seg">
+    <button id="tTerrain" aria-pressed="true">Terrain</button>
+    <button id="tPistes" aria-pressed="true">Surfaces</button>
+    <button id="tLines" aria-pressed="false">Source lines</button>
+    <button id="tContours" aria-pressed="false">Contours</button>
+  </div>
+  <div class="caveat" id="camera"></div>
+</div>
+
+<div class="hud tr card" id="pick">
+  <div class="hint">Click a surface to read the metadata carried inside the tileset.</div>
+</div>
+
+<div class="foot">
+  OpenPiste3D – Aleksei Matveev · code MIT · github.com/alexeymtv/openpiste3d<br>
+  3D Tiles 1.1 · EXT_mesh_features + EXT_structural_metadata · glTF tile content<br>
+  Geobasisdaten: Bayerische Vermessungsverwaltung – www.geodaten.bayern.de (Daten verändert), Lizenz: CC BY 4.0<br>
+  Piste footprints © OpenStreetMap contributors, ODbL – mapped areas, or swept from centrelines<br>
+  Slope measured from the DEM. It complements the published grade; it does not correct it.
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/cesium@1.146.0/Build/Cesium/Cesium.js"></script>
+<script>
+window.CESIUM_BASE_URL = "https://cdn.jsdelivr.net/npm/cesium@1.146.0/Build/Cesium/";
+
+// Opening view. Turn the camera to taste, press C, and the page prints the line
+// to paste back over this one.
+const VIEW = { heading: 130, pitch: -28, range: 10708 };
+
+// European piste grading colours – the convention, not a measurement.
+const GRADE = {
+  easy:         ["#3f8fe0", "easy – blue"],
+  intermediate: ["#d8483a", "intermediate – red"],
+  advanced:     ["#20242e", "advanced – black"],
+  expert:       ["#20242e", "expert – black"],
+  unknown:      ["#7f8c93", "not graded"]
+};
+
+// Mean slope over the whole surface, area-weighted. The break points are taken
+// from the spread of the runs in this build – 9.6° to 26.4°, median 18.4° – so
+// that the classes actually separate them. A borrowed 14/22/30 ramp put fifteen
+// of twenty-one runs in one class and left the top class empty.
+const SLOPE_PROPERTY = "meanSlope";
+const SLOPE = [
+  [14, "#2f7fd4", "under 14°  ·  ≤25%"],
+  [18, "#57a35a", "14–18°  ·  25–32%"],
+  [22, "#d8a24e", "18–22°  ·  32–40%"],
+  [99, "#c0392b", "over 22°  ·  >40%"]
+];
+
+const SLOPE_CAVEAT =
+  "Average gradient over the whole run, weighted by area. Parts of every run are " +
+  "steeper than its average – click one to see how much steeper.";
+
+function start() {
+  const viewer = new Cesium.Viewer("cesium", {
+    baseLayer: false, baseLayerPicker: false, geocoder: false, homeButton: false,
+    sceneModePicker: false, navigationHelpButton: false, timeline: false,
+    animation: false, infoBox: false, selectionIndicator: false,
+    fullscreenButton: false, shouldAnimate: false
+  });
+  viewer.scene.globe.show = false;
+  viewer.scene.skyAtmosphere.show = false;
+  viewer.scene.skyBox.show = false;
+  viewer.scene.backgroundColor = Cesium.Color.fromCssColorString("#aeb9c2");
+  viewer.scene.light = new Cesium.DirectionalLight({
+    direction: new Cesium.Cartesian3(0.35, -0.7, -0.62)
+  });
+
+  function gradeStyle() {
+    const c = Object.entries(GRADE)
+      .map(([k, v]) => `\${difficulty} === '${k}' ? color('${v[0]}')`).join(" : ");
+    return new Cesium.Cesium3DTileStyle({ color: `${c} : color('#7f8c93')` });
+  }
+  function slopeStyle() {
+    const parts = SLOPE.map(([deg, col]) =>
+      `\${${SLOPE_PROPERTY}} < ${Math.tan(deg * Math.PI / 180).toFixed(4)} ? color('${col}')`);
+    return new Cesium.Cesium3DTileStyle({ color: parts.join(" : ") + " : color('#c0392b')" });
+  }
+
+  function drawLegend(mode) {
+    const el = document.getElementById("legend");
+    el.innerHTML = "";
+    const rows = mode === "grade"
+      ? Object.values(GRADE).filter((v, i, a) => a.findIndex(x => x[1] === v[1]) === i)
+      : SLOPE.map(s => [s[1], s[2]]);
+    rows.forEach(([col, label]) => {
+      const d = document.createElement("div");
+      d.innerHTML = `<i style="background:${col}"></i>${label}`;
+      el.appendChild(d);
+    });
+    document.getElementById("caveat").textContent = mode === "slope" ? SLOPE_CAVEAT : "";
+  }
+
+  let pistes, terrain, sourceLines, contours;
+
+  async function boot() {
+    terrain = await Cesium.Cesium3DTileset.fromUrl("../out/terrain.json",
+      { maximumScreenSpaceError: 8 });
+    viewer.scene.primitives.add(terrain);
+
+    pistes = await Cesium.Cesium3DTileset.fromUrl("../out/pistes.json",
+      { maximumScreenSpaceError: 4 });
+    pistes.style = slopeStyle();
+    viewer.scene.primitives.add(pistes);
+
+    // Reference layers, both off until asked for: the surfaces are the subject.
+    sourceLines = await loadLines("../out/source-lines.json",
+      f => f.coordinates, "#ffffff", 2.5, 0.92);
+    contours = await loadLines("../out/contours.json",
+      f => f.geometry.coordinates, "#44525a", 1.0, 0.55);
+    sourceLines.show = false;
+    contours.show = false;
+
+    drawLegend("slope");
+
+    await viewer.zoomTo(pistes, new Cesium.HeadingPitchRange(
+      Cesium.Math.toRadians(VIEW.heading), Cesium.Math.toRadians(VIEW.pitch), VIEW.range));
+
+    const r = await fetch("../out/build-report.json").then(x => x.json()).catch(() => null);
+    if (r) {
+      document.getElementById("meta").innerHTML =
+        `${r.featureCount} surfaces · ${r.pistes.triangles.toLocaleString()} triangles<br>` +
+        `terrain ${r.terrain.triangles.toLocaleString()} triangles<br>` +
+        `built ${r.generated.slice(0, 10)} · every attribute measured from the DEM<br>` +
+        `CesiumJS ${Cesium.VERSION}`;
+    }
+  }
+
+  /** Reference overlays: plain polylines, no metadata attached. */
+  async function loadLines(url, pick, css, width, alpha) {
+    const collection = new Cesium.PolylineCollection();
+    const data = await fetch(url).then(x => x.json()).catch(() => null);
+    if (!data) {
+      console.warn(url + " is missing – run the pipeline to generate it");
+      viewer.scene.primitives.add(collection);
+      return collection;
+    }
+    const material = Cesium.Material.fromType("Color",
+      { color: Cesium.Color.fromCssColorString(css).withAlpha(alpha) });
+    for (const f of data.features || []) {
+      const positions = pick(f).map(([lon, lat, h]) => Cesium.Cartesian3.fromDegrees(lon, lat, h));
+      if (positions.length >= 2) collection.add({ positions, width, material });
+    }
+    viewer.scene.primitives.add(collection);
+    return collection;
+  }
+
+  const fmt = (v, d = 1) => (Math.round(v * Math.pow(10, d)) / Math.pow(10, d)).toFixed(d);
+  const deg = (ratio) => Math.atan(ratio) * 180 / Math.PI;
+
+  const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
+  handler.setInputAction((movement) => {
+    const picked = viewer.scene.pick(movement.position);
+    const box = document.getElementById("pick");
+    if (!Cesium.defined(picked) || typeof picked.getProperty !== "function") {
+      box.innerHTML = '<div class="hint">Click a surface to read the metadata carried inside the tileset.</div>';
+      return;
+    }
+    const g = (k) => picked.getProperty(k);
+    const grade = g("difficulty") || "unknown";
+    const mean = deg(g("meanSlope"));
+    const p90 = deg(g("p90Slope"));
+
+    // Where the categorical grade and the measurement pull apart, say so – and
+    // say which number is doing the talking, since the two describe different things.
+    const band = grade === "easy" ? [0, 14] : grade === "intermediate" ? [14, 22] : [22, 90];
+    const off = p90 > band[1] + 4 ? "its steepest tenth is well above the band this grade implies"
+              : mean < band[0] - 4 ? "gentler on average than this grade implies" : null;
+
+    box.innerHTML =
+      `<div class="name">${g("name") || "unnamed"}</div><table>` +
+      `<tr><td>Mapped grade</td><td>${grade}</td></tr>` +
+      `<tr><td>Footprint</td><td>${g("source") || "–"}</td></tr>` +
+      `<tr><td>Mean slope</td><td>${fmt(mean)}° / ${Math.round(g("meanSlope") * 100)}%</td></tr>` +
+      `<tr><td>Median slope</td><td>${fmt(deg(g("medianSlope")))}°</td></tr>` +
+      `<tr><td>Steepest tenth</td><td>${fmt(p90)}° / ${Math.round(g("p90Slope") * 100)}%</td></tr>` +
+      `<tr><td>Surface area</td><td>${(g("areaM2") / 10000).toFixed(1)} ha</td></tr>` +
+      `<tr><td>Vertical extent</td><td>${Math.round(g("verticalExtentM"))} m</td></tr>` +
+      `<tr><td>Elevation</td><td>${Math.round(g("minElevationM"))}–${Math.round(g("maxElevationM"))} m</td></tr>` +
+      `</table>` + (off ? `<div class="mismatch">${off}</div>` : "");
+  }, Cesium.ScreenSpaceEventType.LEFT_CLICK);
+
+  const bg = document.getElementById("byGrade"), bs = document.getElementById("bySlope");
+  const press = (on, off) => { on.setAttribute("aria-pressed", "true"); off.setAttribute("aria-pressed", "false"); };
+  bg.onclick = () => { pistes.style = gradeStyle(); press(bg, bs); drawLegend("grade"); };
+  bs.onclick = () => { pistes.style = slopeStyle(); press(bs, bg); drawLegend("slope"); };
+
+  const toggle = (btn, get) => btn.onclick = () => {
+    const p = get(); p.show = !p.show; btn.setAttribute("aria-pressed", String(p.show));
+  };
+  toggle(document.getElementById("tTerrain"), () => terrain);
+  toggle(document.getElementById("tPistes"), () => pistes);
+  toggle(document.getElementById("tLines"), () => sourceLines);
+  toggle(document.getElementById("tContours"), () => contours);
+
+  // Press C to capture the current camera as a VIEW literal. It is shown on the
+  // page and copied to the clipboard, not only logged: the console is the one
+  // place a non-developer will not think to look. `e.code` rather than `e.key`,
+  // so it works on a keyboard laid out in another alphabet.
+  window.addEventListener("keydown", (e) => {
+    if (e.code !== "KeyC" || e.ctrlKey || e.metaKey || e.altKey) return;
+    const c = viewer.camera;
+    const centre = pistes && pistes.boundingSphere ? pistes.boundingSphere.center : null;
+    const range = centre ? Cesium.Cartesian3.distance(c.positionWC, centre) : 0;
+    const line = "const VIEW = { heading: " + Math.round(Cesium.Math.toDegrees(c.heading)) +
+                 ", pitch: " + Math.round(Cesium.Math.toDegrees(c.pitch)) +
+                 ", range: " + Math.round(range) + " };";
+    const box = document.getElementById("camera");
+    box.innerHTML = "";
+    const code = document.createElement("div");
+    code.style.cssText = "font-family:'IBM Plex Mono',monospace;color:#eef3f4;" +
+      "user-select:all;word-break:break-all;margin-top:6px";
+    code.textContent = line;
+    const note = document.createElement("div");
+    note.textContent = "Current view – paste this over VIEW near the top of index.html.";
+    box.appendChild(note);
+    box.appendChild(code);
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(line)
+        .then(() => { note.textContent = "Copied to the clipboard. Paste it over VIEW in index.html."; })
+        .catch(() => {});
+    }
+    console.log(line);
+  });
+
+  boot().catch(e => {
+    fail("Failed to load the tileset.",
+         e.message + " – is out/pistes.json present? Run the pipeline first.");
+    console.error(e);
+  });
+}
+
+function fail(msg, detail, tone = "#e08b6a") {
+  document.getElementById("meta").innerHTML =
+    `<span style="color:${tone}">${msg}</span>` +
+    (detail ? `<br><span style="color:#9fb0b6">${detail}</span>` : "");
+}
+
+if (location.protocol === "file:") {
+  // Not a fault: every browser refuses fetch() from a file:// page, so the
+  // tileset cannot load this way and no amount of code here can change it.
+  // Say so without looking like a crash.
+  fail("Open this through the start file, not by double-clicking.",
+       "Nothing is broken. Browsers do not allow a page opened straight from disk " +
+       "to load the tileset, so this page needs a local server – which is what the " +
+       "start file is for.<br><br>" +
+       "Go up one folder, to the one holding <b>serve.py</b>, and:<br>" +
+       "&nbsp;&nbsp;Windows – double-click <b>start-windows.bat</b><br>" +
+       "&nbsp;&nbsp;macOS / Linux – double-click <b>start-mac-linux.command</b><br><br>" +
+       "It opens the viewer in your browser by itself. Published on a web server – " +
+       "GitHub Pages, for instance – the page just works; this only affects opening " +
+       "it from your own disk.", "#d8a24e");
+} else if (typeof Cesium === "undefined") {
+  fail("CesiumJS did not load.",
+       "The page pulls it from cdn.jsdelivr.net – check the network tab, or vendor Cesium locally.");
+} else {
+  try {
+    start();
+  } catch (e) {
+    fail("Could not start the viewer.", e.message);
+    console.error(e);
+  }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+# Tessellation cell size – sensitivity
+
+Slope statistics for three runs at four cell sizes. The question is not which value is *right* but where the numbers stop moving.
+
+| Run | Cell | Triangles | Mean slope | p90 slope |
+|---|---:|---:|---:|---:|
+| Kandahar-Abfahrt | 5 m | 25648 | 20.24° | 30.60° |
+| Kandahar-Abfahrt | 10 m | 7222 | 19.99° | 29.96° |
+| Kandahar-Abfahrt | 20 m | 2282 | 19.75° | 29.28° |
+| Kandahar-Abfahrt | 40 m | 895 | 19.59° | 28.61° |
+| Olympia Abfahrt | 5 m | 1770 | 24.34° | 37.03° |
+| Olympia Abfahrt | 10 m | 589 | 23.85° | 34.96° |
+| Olympia Abfahrt | 20 m | 264 | 23.58° | 32.19° |
+| Olympia Abfahrt | 40 m | 167 | 23.91° | 30.98° |
+| Olympia Abfahrt | 5 m | 11239 | 17.91° | 26.73° |
+| Olympia Abfahrt | 10 m | 3289 | 17.59° | 25.78° |
+| Olympia Abfahrt | 20 m | 1117 | 17.43° | 25.06° |
+| Olympia Abfahrt | 40 m | 477 | 17.30° | 24.98° |
+| Osterfelder-Abfahrt | 5 m | 5051 | 18.78° | 28.64° |
+| Osterfelder-Abfahrt | 10 m | 1514 | 18.43° | 27.40° |
+| Osterfelder-Abfahrt | 20 m | 552 | 18.16° | 25.83° |
+| Osterfelder-Abfahrt | 40 m | 272 | 17.95° | 25.21° |

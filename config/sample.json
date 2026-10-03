@@ -1,0 +1,18 @@
+{
+  "_comment": "Self-contained sample. Everything it needs is committed to this repository, so a clean clone builds without downloading anything.",
+  "profile": "ski_piste",
+  "dem_glob": "data/sample/*.tif",
+  "dem_step": 5.0,
+  "dem_epsg": 25832,
+  "features": "data/osm_garmisch.geojson",
+  "features_epsg": 4326,
+  "name_field": "name",
+  "class_field": "piste:difficulty",
+  "filter_field": "piste:type",
+  "filter_value": "downhill",
+  "sweep_lines": true,
+  "prefer_mapped": true,
+  "terrain_step": 10.0,
+  "margin": 150.0,
+  "contour_interval": 50.0
+}

@@ -1,0 +1,18 @@
+{
+  "_comment": "Full Garmisch build. The DGM1 tiles are not in the repository (about 200 MB); run `python -m pipeline.fetch --config config/garmisch.json` to download them into data/dgm1/, or use config/sample.json, which needs no downloads.",
+  "profile": "ski_piste",
+  "dem_glob": "data/dgm1/**/*.tif",
+  "dem_step": 5.0,
+  "dem_epsg": 25832,
+  "features": "data/osm_garmisch.geojson",
+  "features_epsg": 4326,
+  "name_field": "name",
+  "class_field": "piste:difficulty",
+  "filter_field": "piste:type",
+  "filter_value": "downhill",
+  "sweep_lines": true,
+  "prefer_mapped": true,
+  "terrain_step": 15.0,
+  "contour_interval": 50.0,
+  "margin": 250.0
+}
