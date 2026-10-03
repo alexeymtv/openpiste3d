@@ -232,10 +232,16 @@ fit the variable are classification; changing which variable is drawn until the 
 looks livelier is not, and this project did that once before noticing.
 
 **The percentile depends on mesh resolution, the mean does not.**
-`experiments/cell_size.py` measures this: across an eightfold change in cell size the
-mean moves ~3% and the p90 moves ~7%, always downward as cells coarsen. So the
-tessellation cell is not a chosen constant – it is derived as two DEM post spacings,
-and both the value and the rule are written into `build-report.json`.
+`experiments/cell_size.py` measures this across four runs and an eightfold change in
+cell size: the mean moves by at most 4.4%, the 90th percentile by at most 16.3%, always
+downward as cells coarsen. The mean survives a change of mesh resolution; the percentile
+does not, and is not comparable between datasets unless the cell size is quoted with it.
+So the tessellation cell is not a chosen constant – it is derived as two DEM post
+spacings, and both the value and the rule are written into `build-report.json`.
+
+The earlier version of this paragraph said ~3% and ~7%. Those were measured on one run,
+and the figures were not revised when the experiment grew to three. The script now
+computes its own summary, so the two cannot drift apart again.
 
 **Source DEM 1 m, processing grid 5 m.** DGM1 is a 1 m product; this prototype
 resamples it to 5 m before measuring. Measurements are therefore 5 m measurements.

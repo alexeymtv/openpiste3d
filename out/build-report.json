@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-03T18:40:46Z",
+  "generated": "2026-10-03T19:30:03Z",
   "origin": {
     "lon": 11.085423758206653,
     "lat": 47.458066882453885,
@@ -419,5 +419,5 @@
       "note": "Typical groomed widths, chosen by the author from cartographic practice. They are not survey values. An explicit tagged width always overrides them, and footprints built this way are labelled swept-from-centreline."
     }
   },
-  "elapsedSeconds": 23.2
+  "elapsedSeconds": 20.6
 }

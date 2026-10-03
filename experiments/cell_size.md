@@ -20,3 +20,14 @@ Slope statistics for three runs at four cell sizes. The question is not which va
 | Osterfelder-Abfahrt | 10 m | 1514 | 18.43° | 27.40° |
 | Osterfelder-Abfahrt | 20 m | 552 | 18.16° | 25.83° |
 | Osterfelder-Abfahrt | 40 m | 272 | 17.95° | 25.21° |
+
+## Drift from the finest cell to the coarsest
+
+| Run | Cells | Mean slope | p90 slope |
+|---|---|---:|---:|
+| Kandahar-Abfahrt | 5 m to 40 m | -3.2% | -6.5% |
+| Olympia Abfahrt | 5 m to 40 m | -1.8% | -16.3% |
+| Olympia Abfahrt | 5 m to 40 m | -3.4% | -6.5% |
+| Osterfelder-Abfahrt | 5 m to 40 m | -4.4% | -12.0% |
+
+Across 4 runs and an eightfold change in cell size the mean moves by at most 4.4% and the 90th percentile by at most 16.3%, always downward as cells coarsen. The mean survives a change of mesh resolution; the percentile does not, and is not comparable between datasets unless the cell size is quoted with it. That is why the cell is derived from the DEM rather than chosen, and why both the value and the rule are written into the build report.
