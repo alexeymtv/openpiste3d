@@ -1,0 +1,17 @@
+# DGM1 tiles for the full Garmisch build – about 200 MB, fetched on demand.
+# The small sample DEM under data/sample/ IS committed, deliberately, so that a
+# clean clone builds with no downloads.
+data/dgm1/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Scratch build directories. out/ itself is committed: it is what the viewer
+# and the GitHub Pages demo read.
+out-*/
+
+.DS_Store
+Thumbs.db
