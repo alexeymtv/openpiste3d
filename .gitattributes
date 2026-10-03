@@ -1,0 +1,12 @@
+# Keep the Windows launcher as CRLF whatever the checkout platform does:
+# cmd.exe can mishandle labels and `goto` in a .bat with bare LF endings.
+*.bat text eol=crlf
+*.command text eol=lf
+*.py text eol=lf
+*.md text eol=lf
+*.html text eol=lf
+*.json text eol=lf
+
+# Binary, never touch
+*.glb binary
+*.tif binary
