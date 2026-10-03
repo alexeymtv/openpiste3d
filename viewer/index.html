@@ -99,7 +99,7 @@ window.CESIUM_BASE_URL = "https://cdn.jsdelivr.net/npm/cesium@1.146.0/Build/Cesi
 
 // Opening view. Turn the camera to taste, press C, and the page prints the line
 // to paste back over this one.
-const VIEW = { heading: 130, pitch: -28, range: 10708 };
+const VIEW = { heading: 139, pitch: -36, range: 10946 };
 
 // European piste grading colours – the convention, not a measurement.
 const GRADE = {
@@ -195,9 +195,7 @@ function start() {
     if (r) {
       document.getElementById("meta").innerHTML =
         `${r.featureCount} surfaces · ${r.pistes.triangles.toLocaleString()} triangles<br>` +
-        `terrain ${r.terrain.triangles.toLocaleString()} triangles<br>` +
-        `built ${r.generated.slice(0, 10)} · every attribute measured from the DEM<br>` +
-        `CesiumJS ${Cesium.VERSION}`;
+        `every attribute measured from the DEM`;
     }
   }
 
