@@ -1,5 +1,5 @@
 {
-  "generated": "2026-10-03T17:46:25Z",
+  "generated": "2026-10-03T18:40:46Z",
   "origin": {
     "lon": 11.085423758206653,
     "lat": 47.458066882453885,
@@ -20,7 +20,7 @@
   "terrain": {
     "vertices": 150540,
     "triangles": 299530,
-    "bytes": 7208296
+    "bytes": 7208300
   },
   "overlays": {
     "sourceLines": {
@@ -419,5 +419,5 @@
       "note": "Typical groomed widths, chosen by the author from cartographic practice. They are not survey values. An explicit tagged width always overrides them, and footprints built this way are labelled swept-from-centreline."
     }
   },
-  "elapsedSeconds": 21.1
+  "elapsedSeconds": 23.2
 }

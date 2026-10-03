@@ -235,8 +235,16 @@ def write_feature_glb(path: str, surfaces, origin_lonlat_h, schema: dict,
     return {"vertices": int(len(pos)), "triangles": int(len(idx) // 3), "bytes": size}
 
 
-def write_terrain_glb(path: str, terrain, origin_lonlat_h, step: float = 15.0):
-    """The DEM itself as a glTF surface, so the demo needs no terrain service."""
+def write_terrain_glb(path: str, terrain, origin_lonlat_h, step: float = 15.0,
+                      base_color=(0.72, 0.75, 0.78)):
+    """The DEM itself as a glTF surface, so the demo needs no terrain service.
+
+    `base_color` is the material's linear RGB. It is a presentation choice and
+    nothing reads it back, so it is exposed in the configuration as
+    `terrain_color` rather than buried here. Light values keep the relief
+    readable: the shading comes from the surface normals, and a dark base leaves
+    the shadowed slopes with nowhere to go.
+    """
     glb = GLB()
     to_wgs = Transformer.from_crs(f"EPSG:{terrain.epsg}", "EPSG:4326", always_xy=True)
     lon0, lat0, h0 = origin_lonlat_h
@@ -287,7 +295,7 @@ def write_terrain_glb(path: str, terrain, origin_lonlat_h, step: float = 15.0):
             "attributes": {"POSITION": a_pos, "NORMAL": a_nrm},
             "indices": a_idx, "material": 0, "mode": 4}]}],
         "materials": [{
-            "pbrMetallicRoughness": {"baseColorFactor": [0.52, 0.56, 0.60, 1.0],
+            "pbrMetallicRoughness": {"baseColorFactor": [*base_color, 1.0],
                                      "metallicFactor": 0.0, "roughnessFactor": 1.0},
             "doubleSided": True}],
     }

@@ -124,7 +124,8 @@ def build(cfg: dict, out_dir: str):
                           geometric_error=cfg.get("geometric_error", 180.0))
 
     stats_t = tiles3d.write_terrain_glb(
-        os.path.join(out_dir, "terrain.glb"), terrain, origin, step=terrain_step)
+        os.path.join(out_dir, "terrain.glb"), terrain, origin, step=terrain_step,
+        base_color=tuple(cfg.get("terrain_color", (0.72, 0.75, 0.78))))
     tiles3d.write_tileset(os.path.join(out_dir, "terrain.json"), "terrain.glb", origin, region,
                           geometric_error=cfg.get("geometric_error", 512.0))
 

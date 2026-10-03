@@ -14,5 +14,10 @@
   "prefer_mapped": true,
   "terrain_step": 10.0,
   "margin": 150.0,
-  "contour_interval": 50.0
+  "contour_interval": 50.0,
+  "terrain_color": [
+    0.72,
+    0.75,
+    0.78
+  ]
 }
