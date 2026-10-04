@@ -202,7 +202,12 @@ against the runs OpenStreetMap maps *twice* – once as a centreline, once as an
 by casting a perpendicular at every station along the centreline that falls inside
 the mapped area and clipping it to that area. Across the seven Garmisch runs with
 enough overlap to compare, the model's width comes out at a median **0.54** of the
-mapped width, and on the two runs with ~93% overlap it is off by nearly threefold.
+mapped width, ranging from 0.21 on Olympia Abfahrt to 0.98 on Längenfelder II. The
+error does not track how much of the run was comparable – three runs exceed 90%
+coverage and their ratios are 0.36, 0.37 and 0.86 – but it tracks the mapped corridor's
+width closely (r = -0.84): the model returns 22–29 m whatever the run, while the mapped
+corridors run 30–123 m. The model is close to a constant, and the error is mostly the
+mapped width moving out from under it.
 The effect on what is published is much smaller – mean slope moves a median **+1.6°**,
 p90 **+1.3°** – because a band of the wrong width on the same hillside is still on
 that hillside.
@@ -240,7 +245,7 @@ So the tessellation cell is not a chosen constant – it is derived as two DEM p
 spacings, and both the value and the rule are written into `build-report.json`.
 
 The earlier version of this paragraph said ~3% and ~7%. Those were measured on one run,
-and the figures were not revised when the experiment grew to three. The script now
+and the figures were not revised when the experiment grew to four. The script now
 computes its own summary, so the two cannot drift apart again.
 
 **Source DEM 1 m, processing grid 5 m.** DGM1 is a 1 m product; this prototype

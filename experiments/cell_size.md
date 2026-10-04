@@ -1,6 +1,6 @@
 # Tessellation cell size – sensitivity
 
-Slope statistics for three runs at four cell sizes. The question is not which value is *right* but where the numbers stop moving.
+Slope statistics for four runs at four cell sizes. Two of the four are separate OpenStreetMap ways that both carry the name "Olympia Abfahrt"; they are distinct features, not a duplicate row. The question is not which value is *right* but where the numbers stop moving.
 
 | Run | Cell | Triangles | Mean slope | p90 slope |
 |---|---:|---:|---:|---:|
